@@ -35,6 +35,7 @@ module.exports = {
     }
 
     console.log(chalk.green("Available official templates:"));
+
     var repoNameData = [];
     request({
       url: 'https://api.github.com/users/uba-templates/repos',
@@ -50,7 +51,10 @@ module.exports = {
           //     (index + 1) + ')' + '  ' + chalk.yellow('★') +
           //     '  ' + chalk.blue(repo.name) +
           //     ' - ' + repo.description);
-          repoNameData.push(`${repo.name} - ${repo.description}`);
+          if(repo.name.match("template-")){
+            repoNameData.push(`${repo.name} - ${repo.description}`);
+          }
+
         });
         //TODO 人机交互
         inquirer.prompt([{

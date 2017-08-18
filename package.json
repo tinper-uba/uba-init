@@ -1,8 +1,11 @@
 {
   "name": "uba-init",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "uba plugin for init",
   "main": "index.js",
+  "bin": {
+    "uba-init": "./bin/uba-init.js"
+  },
   "scripts": {
     "test": "node test"
   },
