@@ -1,3 +1,8 @@
+/**
+ * uba init
+ * 2018-05-04 21:16:15
+ */
+
 const request = require('request');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
@@ -24,7 +29,7 @@ function getVersion() {
 
 
 module.exports = {
-  plugin: function(options) {
+  plugin: function (options) {
     commands = options.cmd;
     pluginname = options.name;
     if (options.argv.h || options.argv.help) {
@@ -38,23 +43,18 @@ module.exports = {
 
     var repoNameData = [];
     request({
-      url: 'https://api.github.com/users/uba-templates/repos',
+      url: 'http://iuap-design-cdn.oss-cn-beijing.aliyuncs.com/static/uba/project.json',
       headers: {
         'User-Agent': 'uba'
       }
-    }, function(err, res, body) {
+    }, function (err, res, body) {
       if (err) console.log(err);
       var requestBody = JSON.parse(body);
-      if (Array.isArray(requestBody)) {
-        requestBody.forEach(function(repo, index) {
-          // console.log(
-          //     (index + 1) + ')' + '  ' + chalk.yellow('★') +
-          //     '  ' + chalk.blue(repo.name) +
-          //     ' - ' + repo.description);
-          if(repo.name.match("template-")){
-            repoNameData.push(`${repo.name} - ${repo.description}`);
-          }
-
+      if (requestBody) {
+        requestBody.project.forEach(function(repo, index){
+          repo.sub.forEach(function(item,i){
+            repoNameData.push(`${item.repositories} - ${item.title}`);
+          });
         });
         //TODO 人机交互
         inquirer.prompt([{
@@ -62,17 +62,17 @@ module.exports = {
           name: 'selectRepo',
           message: 'Please select :',
           choices: repoNameData
-        }]).then(function(answers) {
+        }]).then(function (answers) {
           var selectName = answers.selectRepo.split(' - ')[0];
           var questions = [{
             type: 'input',
             name: 'selectName',
             message: 'boilerplate name :',
-            default: function() {
+            default: function () {
               return 'uba-boilerplate';
             }
           }];
-          inquirer.prompt(questions).then(function(answers) {
+          inquirer.prompt(questions).then(function (answers) {
             var name = answers.selectName,
               template = selectName;
             var root = path.resolve(name);
@@ -84,26 +84,26 @@ module.exports = {
             }
             console.log(chalk.red(`Downloading ${template} please wait.`));
             //TODO 开始下载
-            download(`uba-templates/${template}`, `${name}`, function(err) {
+            download(`uba-templates/${template}`, `${name}`, function (err) {
               if (!err) {
                 console.log(chalk.green(`Boilerplate ${name} done.`));
                 inquirer.prompt([{
                   type: 'confirm',
                   message: 'Automatically install NPM dependent packages?',
                   name: 'ok'
-                }]).then(function(res) {
+                }]).then(function (res) {
                   var npmInstallChdir = path.resolve('.', name);
                   if (res.ok) {
                     console.log(chalk.green(`Install NPM dependent packages,please wait.`));
                     //TODO 选择自动安装
                     process.chdir(npmInstallChdir);
-                    var args = ['install'].filter(function(e) {
+                    var args = ['install'].filter(function (e) {
                       return e;
                     });
                     var proc = spawn('npm', args, {
                       stdio: 'inherit'
                     });
-                    proc.on('close', function(code) {
+                    proc.on('close', function (code) {
                       if (code !== 0) {
                         console.error('`npm ' + args.join(' ') + '` failed');
                         return;
